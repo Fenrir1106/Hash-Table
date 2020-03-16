@@ -1,0 +1,132 @@
+#include <stdio.h>
+#include <malloc.h>
+#define SIZE 20
+
+struct Node{
+	int value;		//saya pakai konsep seperate chaining dengan linked list
+	Node *next;
+};
+
+Node *table[SIZE]; // buat tablenya
+
+Node *createNode(int val){
+	Node *node = (Node*)malloc(sizeof(Node));
+	node->value=val;							// buat membuat node baru
+	node->next=NULL;
+	return node;
+}
+
+int hash(int value){
+	return value % SIZE;		//hash functionnya
+}
+
+void insert(int val){
+	Node *node=createNode(val);
+	int key = hash(node->value);
+	
+	if(table[key]==NULL){
+		table[key]=node; 								//if the table is null then insert 
+	}else {
+		
+		if(table[key]->next==NULL){
+			table[key]->next=node; 
+		}else {											//use seperate chaining for collision handling
+			Node *curr=table[key];
+			while(curr->next!=NULL){
+				curr=curr->next;
+			}
+			curr->next=node;
+		}
+		
+	}
+}
+
+void del(int val){
+	int key = hash(val);
+	if(table[key]==NULL){
+		return ;
+	}else{
+		if(table[key]->value==val){
+			if(table[key]->next==NULL){
+				table[key]=NULL;
+			}else {
+				Node *del = table[key];
+				table[key]=table[key]->next;
+				free(del);
+				del = NULL;
+			}
+		}else {
+			Node *del=table[key]->next;
+			Node *prev=table[key];
+			while(del->value!=val && del!=NULL){
+				del = del->next;
+				prev = prev->next;
+			}
+			prev->next = del->next;
+			free(del);
+			del=NULL;
+		}	
+	}
+}
+
+void init(){
+	for(int i=0;i<SIZE;i++){
+		table[i] = NULL;		//function to initialize out table;
+	}
+}
+
+void view(){
+	for(int i=0;i<SIZE;i++){
+		if(i+1<10){
+			printf("%d  | ", i+1);
+		}else {
+			printf("%d | ", i+1);
+		}	
+		Node *curr=table[i];
+		while(curr!=NULL){					//function to view our table
+			printf("%d -> ", curr->value);
+			curr=curr->next;
+		}
+		printf("\n");
+	}
+}
+
+void cls(){
+	for(int i=0;i<35;i++){
+		printf("\n");
+	}
+}
+
+
+int main(){
+	int input;
+	int menu;
+	init();
+	while(1){
+		
+		cls();
+		view();
+		printf("1. Insert\n");
+		printf("2. Delete\n");
+		printf("3. Exit\n");
+		printf(">> ");
+		scanf("%d", &menu); getchar();
+		if(menu==3){
+			break;
+		}
+		switch(menu){
+			case 1:
+				printf("Insert data : ");
+				scanf("%d", &input);
+				insert(input);
+				break;
+			case 2:
+				printf("Input data : ");
+				scanf("%d", &input);
+				del(input);
+				break;
+		}
+	}
+	
+	return 0;
+}
